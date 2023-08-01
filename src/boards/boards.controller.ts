@@ -8,6 +8,7 @@ import {
   Patch,
   UsePipes,
   ValidationPipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { BoardStatus } from './board.model';
@@ -19,9 +20,9 @@ import { Board } from './board.entity';
 export class BoardsController {
   constructor(private boardsService: BoardsService) {}
 
-  @Get('/:id')
-  getBoardById(@Param('id') id: number): Promise<Board> {
-    return this.boardsService.getBoardById(id);
+  @Get()
+  getAllBoards(): Promise<Board[]> {
+    return this.boardsService.getAllBoards();
   }
 
   //   @Get()
@@ -29,22 +30,44 @@ export class BoardsController {
   //     return this.boardsService.getAllBoards();
   //   }
 
+  @Post()
+  @UsePipes(ValidationPipe)
+  createBoard(@Body() createBoardDto: CreateBoardDto): Promise<Board> {
+    return this.boardsService.createBoard(createBoardDto);
+  }
+
   //   @Post()
   //   @UsePipes(ValidationPipe)
   //   createBoard(@Body() createBoardDto: CreateBoardDto): Board {
   //     return this.boardsService.createBoard(createBoardDto);
   //   }
 
+  @Get('/:id')
+  getBoardById(@Param('id') id: number): Promise<Board> {
+    return this.boardsService.getBoardById(id);
+  }
+
   //   @Get('/:id')
   //   getBoardById(@Param('id') id: string): Board {
   //     return this.boardsService.getBoardById(id);
   //   }
 
+  @Delete('/:id')
+  deleteBoard(@Param('id', ParseIntPipe) id: string): Promise<void> {
+    return this.boardsService.deleteBoard(id);
+  }
   //   @Delete('/:id')
   //   deleteBoard(@Param('id') id: string): void {
   //     this.boardsService.deleteBoard(id);
   //   }
 
+  @Patch('/:id/status')
+  updateBoardStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('status', BoardStatusValidationPipe) status: BoardStatus,
+  ): Promise<Board> {
+    return this.boardsService.updateBoardStatus(id, status);
+  }
   //   @Patch('/:id/status')
   //   updateBoardStatus(
   //     @Param('id') id: string,

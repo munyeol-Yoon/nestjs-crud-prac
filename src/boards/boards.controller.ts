@@ -9,19 +9,31 @@ import {
   UsePipes,
   ValidationPipe,
   ParseIntPipe,
+  Logger,
 } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { BoardStatus } from './board.model';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe';
 import { Board } from './board.entity';
+import { ApiTags } from '@nestjs/swagger';
+import { Ip } from 'src/decorators/ip.decorator';
 
 @Controller('boards')
+@ApiTags('Board')
 export class BoardsController {
   constructor(private boardsService: BoardsService) {}
 
+  private readonly logger = new Logger(BoardsController.name);
+
   @Get()
-  getAllBoards(): Promise<Board[]> {
+  getAllBoards(@Ip() ip: string): Promise<Board[]> {
+    this.logger.log(ip);
+    this.logger.debug(ip);
+    this.logger.error(ip);
+    this.logger.verbose(ip);
+    this.logger.warn(ip);
+    console.log(`${ip}`);
     return this.boardsService.getAllBoards();
   }
 
@@ -32,7 +44,9 @@ export class BoardsController {
 
   @Post()
   @UsePipes(ValidationPipe)
-  createBoard(@Body() createBoardDto: CreateBoardDto): Promise<Board> {
+  createBoard(
+    @Body(new ValidationPipe()) createBoardDto: CreateBoardDto,
+  ): Promise<Board> {
     return this.boardsService.createBoard(createBoardDto);
   }
 
@@ -43,7 +57,7 @@ export class BoardsController {
   //   }
 
   @Get('/:id')
-  getBoardById(@Param('id') id: number): Promise<Board> {
+  getBoardById(@Param('id', ParseIntPipe) id: number): Promise<Board> {
     return this.boardsService.getBoardById(id);
   }
 
